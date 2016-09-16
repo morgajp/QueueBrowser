@@ -42,10 +42,14 @@ class Application(tk.Frame):
 
         self.tree.bind("<<TreeviewSelect>>", self.TreeItemClick)
 
-        self.details = tk.Text(self, width=60)
-        self.details.pack(side="left", fill=BOTH, expand=1)
+        sendframe = tk.Frame(self)
+        sendframe.pack(side='left', fill=tk.BOTH, expand=1)
 
-        #self.sendB = 
+        self.details = tk.Text(sendframe, width=60)
+        self.details.pack(side="top", fill=tk.BOTH, expand=1)
+
+        self.sendB = tk.Button(sendframe, text="Send Msg", command=self.say_hi)
+        self.sendB.pack(side="top")
 
         #self.hi_there = tk.Button(self)
         #self.hi_there["text"] = "Hello World\n(click me)"
@@ -58,9 +62,7 @@ class Application(tk.Frame):
 
     def TreeItemClick(self, par):
         item = self.tree.selection()
-        print(item)
-        print(self.tree.item(item))
-        print(self.tree.parent(item))
+        self.details.delete(1.0, END)
         self.details.insert(END, self.tree.item(item)['text'])
 
     def addCreds(self):
@@ -70,7 +72,7 @@ class Application(tk.Frame):
         self.say_hi()
 
     def say_hi(self):
-        print("hi there, everyone!")
+        self.qm.write(self.qm.queues[0], "hi there, everyone!")
 
 root = tk.Tk()
 root.geometry("900x580")

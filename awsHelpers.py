@@ -27,7 +27,13 @@ class QueueManager:
         return msgs
 
 
-    def purgeQueue(self, queueUrl):
+    def write(self, QueueData, text):
+        sqs = self.session.resource('sqs')
+        queue = sqs.Queue(QueueData['url'])
+        queue.send_message(MessageBody=text)
+
+
+    def purge(self, queueUrl):
         sqs = self.session.resource('sqs')
         queue = sqs.Queue(queueUrl)
         queue.purge()
