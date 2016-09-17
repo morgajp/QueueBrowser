@@ -32,7 +32,8 @@ class Application(tk.Frame):
         self.tree.configure(yscroll=ysb.set)
         self.tree.heading('#0', text='queues', anchor='w')
         for q in self.qm.getQueues():
-            qnode = self.tree.insert("", 'end', text="{} - {}".format(q['url'], q['msgCount']))
+            qnode = self.tree.insert("", 'end', text="{} - {}".format(q['url'], q['msgCount']), values=q)
+            self.fillMessages(qnode, q)
             for msg in self.qm.getMessages(q):
                 self.tree.insert(qnode, 'end', text=msg.body[:128])
        # node1 = self.tree.insert("", 'end', text="test1")
@@ -48,8 +49,13 @@ class Application(tk.Frame):
         self.details = tk.Text(sendframe, width=60)
         self.details.pack(side="top", fill=tk.BOTH, expand=1)
 
-        self.sendB = tk.Button(sendframe, text="Send Msg", command=self.say_hi)
-        self.sendB.pack(side="top")
+        buttonFrame = tk.Frame(sendframe)
+        buttonFrame.pack(side='top')
+        self.sendB = tk.Button(buttonFrame, text="Send Msg", command=self.say_hi)
+        self.sendB.pack(side="left")
+
+        self.refreshB = tk.Button(buttonFrame, text='Refresh', command=self.Refresh)
+        self.refreshB.pack(side='left')
 
         #self.hi_there = tk.Button(self)
         #self.hi_there["text"] = "Hello World\n(click me)"
@@ -60,10 +66,26 @@ class Application(tk.Frame):
         #                      command=root.destroy)
         #self.quit.pack(side="bottom")
 
+    def fillMessages(self, node, queue):
+        for msg in self.qm.getMessages(queue):
+            self.tree.insert(node, 'end', text=msg.body[:128])
+
+
     def TreeItemClick(self, par):
         item = self.tree.selection()
         self.details.delete(1.0, END)
         self.details.insert(END, self.tree.item(item)['text'])
+
+    def Refresh(self):
+        selItem = self.tree.selection()
+        selQ = self.qm.queues[self.tree.index(selItem)]
+
+        parent = self.tree.parent(selItem)
+        if parent == ''  and 'url' in selQ:
+            self.tree.delete(*self.tree.get_children(selItem))
+            self.fillMessages(selItem, selQ)
+            
+
 
     def addCreds(self):
         inputDialog = CredDialog.CredDialog(self)
