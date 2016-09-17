@@ -4,6 +4,7 @@ import boto3
 class QueueManager:
     def __init__(self):
         self.session = boto3.Session()
+        self.qmap = {}
 
     def getQueues(self):
         sqs = self.session.resource('sqs')
