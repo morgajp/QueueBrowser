@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import *
-from tkinter import ttk
+from tkinter.ttk import *
 from awsHelpers import QueueManager
 
 import CredDialog
@@ -26,9 +26,13 @@ class Application(tk.Frame):
 
 
     def create_widgets(self):
-        self.tree = ttk.Treeview(self)
+        treeFrame = Frame(self)
+        self.filterInput = Text(treeFrame, height=1)
+        self.filterInput.pack(side='top', fill=X)
+        self.filterInput.bind("<<Modified>>", self.FilterChanged)
+        self.tree = Treeview(treeFrame)
         self.tree.column("#0", width=600, minwidth=300)
-        ysb = ttk.Scrollbar(self, orient='vertical', command=self.tree.yview)
+        ysb = Scrollbar(self, orient='vertical', command=self.tree.yview)
         self.tree.configure(yscroll=ysb.set)
         self.tree.heading('#0', text='queues', anchor='w')
         for q in self.qm.getQueues():
@@ -39,11 +43,13 @@ class Application(tk.Frame):
        # node1 = self.tree.insert("", 'end', text="test1")
        # nodea = self.tree.insert("", 'end', text="test2")
        # node2 = self.tree.insert(node1, 'end', text="test1")
-        self.tree.pack(side="left", fill=BOTH, expand=1)
+        self.tree.pack(side="top", fill=BOTH, expand=1)
 
         self.tree.bind("<<TreeviewSelect>>", self.TreeItemClick)
         self.tree.bind("<<TreeviewOpen>>", self.TreeItemExpand)
 
+        treeFrame.pack(side='left', fill=BOTH, expand=1)
+        
         sendframe = tk.Frame(self)
         sendframe.pack(side='left', fill=tk.BOTH, expand=1)
 
@@ -71,6 +77,17 @@ class Application(tk.Frame):
 
     def TreeItemExpand(self, par):
         self.Refresh()
+
+    def FilterChanged(self, par):
+        self.filterInput.edit_modified()
+        filterStr = self.filterInput.get('1.0', END).strip()
+        for node, queue in self.qm.qmap.items():
+            if filterStr in queue['url'] or filterStr == '':
+                self.tree.move(node, '', 'end')
+            else:
+                self.tree.detach(node)
+        self.filterInput.edit_modified(False)
+
 
     def Refresh(self):
         for selItem in self.tree.selection():
