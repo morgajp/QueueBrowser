@@ -27,9 +27,13 @@ class Application(tk.Frame):
 
     def create_widgets(self):
         treeFrame = Frame(self)
-        self.filterInput = Text(treeFrame, height=1)
-        self.filterInput.pack(side='top', fill=X)
+        filterFrame = Frame(treeFrame)
+        filterLabel = Label(filterFrame, text='QueueFilter')
+        filterLabel.pack(side='left', padx=(2,4))
+        self.filterInput = Text(filterFrame, height=1)
+        self.filterInput.pack(side='left', fill=X)
         self.filterInput.bind("<<Modified>>", self.FilterChanged)
+        filterFrame.pack(side='top', fill=X, pady=(0,4))
         self.tree = Treeview(treeFrame)
         self.tree.column("#0", width=600, minwidth=300)
         ysb = Scrollbar(self, orient='vertical', command=self.tree.yview)
@@ -48,16 +52,16 @@ class Application(tk.Frame):
         self.tree.bind("<<TreeviewSelect>>", self.TreeItemClick)
         self.tree.bind("<<TreeviewOpen>>", self.TreeItemExpand)
 
-        treeFrame.pack(side='left', fill=BOTH, expand=1)
+        treeFrame.pack(side='left', fill=BOTH, expand=1, padx=4, pady=(2,4))
         
         sendframe = tk.Frame(self)
-        sendframe.pack(side='left', fill=tk.BOTH, expand=1)
+        sendframe.pack(side='left', fill=tk.BOTH, expand=1, padx=(0,4), pady=(0,4))
 
         self.details = tk.Text(sendframe, width=60)
         self.details.pack(side="top", fill=tk.BOTH, expand=1)
 
         buttonFrame = tk.Frame(sendframe)
-        buttonFrame.pack(side='top')
+        buttonFrame.pack(side='top', pady=(4,0))
         self.sendB = tk.Button(buttonFrame, text="Send Msg", command=self.Send)
         self.sendB.pack(side="left")
 
