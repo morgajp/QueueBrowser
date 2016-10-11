@@ -11,18 +11,22 @@ class Application(tk.Frame):
         self.master.title("SQS Browser")
         self.qm = QueueManager()
 
-        self.create_menu()
+        #self.create_menu()
 
         self.pack(fill=BOTH, expand=1)
         self.create_widgets()
+        self.pack_widgets()
 
-    def create_menu(self):
-        self.menu = Menu(tearoff=False)
-        self.master.config(menu=self.menu)
-        self.file_menu = Menu(self.menu, tearoff=False)
-        self.menu.add_cascade(label="File", menu=self.file_menu)
-        self.file_menu.add_command(label="Add Credentials", command=self.addCreds)
-        self.file_menu.add_command(label="Exit", command=self.exit)
+    #def create_menu(self):
+    #    self.menu = Menu(tearoff=False)
+    #    self.master.config(menu=self.menu)
+    #    self.file_menu = Menu(self.menu, tearoff=False)
+    #    self.menu.add_cascade(label="File", menu=self.file_menu)
+    #    self.file_menu.add_command(label="Add Credentials", command=self.addCreds)
+    #    self.file_menu.add_command(label="Exit", command=self.exit)
+
+    def pack_widgets(self):
+        pass
 
 
     def create_widgets(self):
@@ -105,7 +109,7 @@ class Application(tk.Frame):
         inputDialog = CredDialog.CredDialog(self)
 
     def Send(self):
-        selItem = self.tree.selection()
+        selItem = self.tree.selection()[0]
         if selItem in self.qm.qmap:
             queue = self.qm.qmap[selItem]
             self.qm.write(queue, self.details.get('1.0', END))
