@@ -19,14 +19,6 @@ class Application(tk.Frame):
         self.create_widgets()
         self.pack_widgets()
 
-    #def create_menu(self):
-    #    self.menu = Menu(tearoff=False)
-    #    self.master.config(menu=self.menu)
-    #    self.file_menu = Menu(self.menu, tearoff=False)
-    #    self.menu.add_cascade(label="File", menu=self.file_menu)
-    #    self.file_menu.add_command(label="Add Credentials", command=self.addCreds)
-    #    self.file_menu.add_command(label="Exit", command=self.exit)
-
     def create_layout(self):
         self.treeFrame = Frame(self)
         self.filterFrame = Frame(self.treeFrame)
@@ -51,8 +43,8 @@ class Application(tk.Frame):
     def create_menus(self):
         self.qmenu = Menu(self.master, tearoff=0)
         self.qmenu.add_command(label='View Messages', command=self.say_hi)
-        self.qmenu.add_command(label='Purge', command=self.say_hi)
-        self.qmenu.add_command(label='Refresh', command=self.say_hi)
+        self.qmenu.add_command(label='Purge', command=self.purge_q)
+        self.qmenu.add_command(label='Refresh', command=self.Refresh)
 
         self.msgmenu = Menu(self.master, tearoff=0)
         self.msgmenu.add_command(label='Delete', command=self.say_hi)
@@ -113,6 +105,9 @@ class Application(tk.Frame):
         for selItem in self.tree.selection():
             if selItem in self.qm.qmap:
                 self.tree.delete(*self.tree.get_children(selItem))
+                q = self.qm.qmap[selItem]
+                self.qm.refresh(q)
+                qnode = self.tree.item(selItem, text="{} - {}".format(q['url'], q['msgCount']))
                 self.fillMessages(selItem)
             
 
@@ -132,6 +127,12 @@ class Application(tk.Frame):
 
     def say_hi(self):
         self.qm.write(self.qm.queues[0], "hi there, everyone!")
+
+    def purge_q(self):
+        selItem = self.tree.selection()[0]
+        if selItem in self.qm.qmap:
+            queue = self.qm.qmap[selItem]
+            self.qm.purge(queue)
 
     def popup(self, event):
         item = self.tree.identify('item', event.x, event.y)

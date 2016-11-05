@@ -29,9 +29,10 @@ class QueueManager:
             try:
                 for q in sqs.queues.all():
                     sessionQueues.append({'url': q.url, 
-                                   'msgCount': q.attributes['ApproximateNumberOfMessages'],
-                                   'ts': q.attributes['LastModifiedTimestamp'],
-                                   'session': s})
+                       'msgCount': q.attributes['ApproximateNumberOfMessages'],
+                       'ts': q.attributes['LastModifiedTimestamp'],
+                       'awsobj': q,
+                       'session': s})
             except:
                 pass
 
@@ -40,11 +41,21 @@ class QueueManager:
 
         return self.queues
 
+    def refresh(self, QueueData):
+        awsq = QueueData['awsobj']
+        awsq.load()
+        newcount = awsq.attributes['ApproximateNumberOfMessages']
+        newts = awsq.attributes['LastModifiedTimestamp']
+        QueueData['msgCount'] = newcount
+        QueueData['ts'] = newts
+
 
     def getMessages(self, QueueData):
         sqs = QueueData['session'].resource('sqs')
         queue = sqs.Queue(QueueData['url'])
-        msgs = queue.receive_messages(VisibilityTimeout=20, MaxNumberOfMessages=10)
+        msgs = queue.receive_messages(VisibilityTimeout=20, 
+                MaxNumberOfMessages=10,
+                WaitTimeSeconds=2)
 
         QueueData['msgs'] = msgs
 
