@@ -20,9 +20,13 @@ class QueueManager:
         self.sm = SessionManager()
         self.qmap = {}
         self.queues = []
+        self.sessionNodes = {}
+
+    def getSessions(self):
+        return self.sm.sessions.keys()
 
     def getQueues(self):
-        for s in self.sm.sessions.values(): 
+        for sname, s in self.sm.sessions.items(): 
             sqs = s.resource('sqs')
             sessionQueues = []
 
@@ -32,6 +36,7 @@ class QueueManager:
                        'msgCount': q.attributes['ApproximateNumberOfMessages'],
                        'ts': q.attributes['LastModifiedTimestamp'],
                        'awsobj': q,
+                       'sessionname': sname,
                        'session': s})
             except:
                 pass
@@ -60,6 +65,9 @@ class QueueManager:
         QueueData['msgs'] = msgs
 
         return msgs
+
+    def addByUrl(self, QueueData, Url):
+        pass
 
 
     def write(self, QueueData, text):

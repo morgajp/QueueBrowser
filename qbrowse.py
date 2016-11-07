@@ -49,6 +49,9 @@ class Application(tk.Frame):
         self.msgmenu = Menu(self.master, tearoff=0)
         self.msgmenu.add_command(label='Delete', command=self.say_hi)
 
+        self.profilemenu = Menu(self.master, tearoff=0)
+        self.profilemenu.add_command(label='Add Queue URL', command=self.AddQUrl)
+
 
     def create_widgets(self):
         self.filterLabel = Label(self.filterFrame, text='QueueFilter')
@@ -60,8 +63,15 @@ class Application(tk.Frame):
         ysb = Scrollbar(self, orient='vertical', command=self.tree.yview)
         self.tree.configure(yscroll=ysb.set)
         self.tree.heading('#0', text='queues', anchor='w')
+        for s in self.qm.getSessions():
+            snode = self.tree.insert("", 'end', text=s, open=True)
+            self.qm.sessionNodes[s] = snode
+
         for q in self.qm.getQueues():
-            qnode = self.tree.insert("", 'end', text="{} - {}".format(q['url'], q['msgCount']))
+            ownerSession = self.qm.sessionNodes[q['sessionname']]
+            qnode = self.tree.insert(ownerSession, 
+                    'end', 
+                    text="{} - {}".format(q['url'], q['msgCount']))
             self.qm.qmap[qnode] = q
             if int(q['msgCount']) > 0:
                 self.tree.insert(qnode, 'end', text='')
@@ -134,6 +144,14 @@ class Application(tk.Frame):
             queue = self.qm.qmap[selItem]
             self.qm.purge(queue)
 
+    def AddQUrl(self):
+        newUrl = GetUrlPopup()
+
+        selItem = self.tree.selection()[0]
+        if selItem in self.qm.qmap:
+            queue = self.qm.qmap[selItem]
+            self.qm.addByUrl(queue, newUrl)
+
     def popup(self, event):
         item = self.tree.identify('item', event.x, event.y)
         if item == '':
@@ -141,6 +159,8 @@ class Application(tk.Frame):
         self.tree.selection_set(item)
         if item in self.qm.qmap:
             self.qmenu.tk_popup(event.x_root, event.y_root)
+        elif item in self.qm.sessionNodes.values():
+            self.profilemenu.tk_popup(event.x_root, event.y_root)
         else:
             self.msgmenu.tk_popup(event.x_root, event.y_root)
 
