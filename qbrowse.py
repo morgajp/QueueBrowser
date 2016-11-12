@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import *
 from tkinter.ttk import *
 from awsHelpers import QueueManager
-import clickMenu
 
 import CredDialog
 
@@ -30,7 +29,8 @@ class Application(tk.Frame):
         self.filterInput.pack(side='left', fill=X)
         self.filterFrame.pack(side='top', fill=X, pady=(0,4))
 
-        self.tree.pack(side="top", fill=BOTH, expand=1)
+        self.tree.pack(side="left", fill=BOTH, expand=1)
+        self.ysb.pack(side="right", fill=Y)
         self.treeFrame.pack(side='left', fill=BOTH, expand=1, padx=4, pady=(2,4))
 
         self.details.pack(side="top", fill=tk.BOTH, expand=1)
@@ -59,9 +59,9 @@ class Application(tk.Frame):
         self.filterInput.bind("<<Modified>>", self.FilterChanged)
 
         self.tree = Treeview(self.treeFrame)
-        self.tree.column("#0", width=600, minwidth=300)
-        ysb = Scrollbar(self, orient='vertical', command=self.tree.yview)
-        self.tree.configure(yscroll=ysb.set)
+        self.tree.column("#0", width=500, minwidth=300)
+        self.ysb = Scrollbar(self.treeFrame, orient='vertical', command=self.tree.yview)
+        self.tree.configure(yscroll=self.ysb.set)
         self.tree.heading('#0', text='queues', anchor='w')
         for s in self.qm.getSessions():
             snode = self.tree.insert("", 'end', text=s, open=True)
@@ -88,14 +88,22 @@ class Application(tk.Frame):
 
     def fillMessages(self, node):
         for msg in self.qm.getMessages(self.qm.qmap[node]):
-            self.tree.insert(node, 'end', text=msg.body[:128])
+            short = msg.body[:120].replace('\n', '\\n')
+            msgnode = self.tree.insert(node, 'end', text=short)
+            self.qm.msgMap[msgnode] = msg
 
 
     def TreeItemClick(self, par):
-        item = self.tree.selection()
-        if self.tree.parent(item) != '':
+        item = self.tree.selection()[0]
+        if item in self.qm.msgMap:
             self.details.delete(1.0, END)
-            self.details.insert(END, self.tree.item(item)['text'])
+            msg = self.qm.msgMap[item].body
+            try:
+                parsedMsg = json.loads(msg)
+                msg = json.dumps(parsedMsg, indent=3)
+            except:
+                pass # Msg not json, just output the text
+            self.details.insert(END, msg)
 
     def TreeItemExpand(self, par):
         self.Refresh()

@@ -19,6 +19,7 @@ class QueueManager:
     def __init__(self):
         self.sm = SessionManager()
         self.qmap = {}
+        self.msgMap = {}
         self.queues = []
         self.sessionNodes = {}
 
