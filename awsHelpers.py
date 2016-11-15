@@ -78,7 +78,8 @@ class QueueManager:
 
 
     def purge(self, QueueData):
+        print('purge')
         sqs = QueueData['session'].resource('sqs')
-        queue = sqs.Queue(queueUrl)
+        queue = sqs.Queue(QueueData['url'])
         queue.purge()
 

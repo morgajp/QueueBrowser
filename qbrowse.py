@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import *
 from tkinter.ttk import *
+
+import json
+
 from awsHelpers import QueueManager
 
 import CredDialog
@@ -22,6 +25,7 @@ class Application(tk.Frame):
         self.treeFrame = Frame(self)
         self.filterFrame = Frame(self.treeFrame)
         self.sendFrame = Frame(self)
+        self.detailFrame = Frame(self.sendFrame)
         self.buttonFrame = Frame(self.sendFrame)
 
     def pack_widgets(self):
@@ -30,10 +34,12 @@ class Application(tk.Frame):
         self.filterFrame.pack(side='top', fill=X, pady=(0,4))
 
         self.tree.pack(side="left", fill=BOTH, expand=1)
-        self.ysb.pack(side="right", fill=Y)
+        self.treeysb.pack(side="right", fill=Y)
         self.treeFrame.pack(side='left', fill=BOTH, expand=1, padx=4, pady=(2,4))
 
-        self.details.pack(side="top", fill=tk.BOTH, expand=1)
+        self.detailysb.pack(side="right", fill=Y)
+        self.details.pack(side="left", fill=BOTH, expand=1)
+        self.detailFrame.pack(side='top', fill=Y, expand=1)
         self.sendFrame.pack(side='left', fill=tk.BOTH, expand=1, padx=(0,4), pady=(2,4))
 
         self.refreshB.pack(side='left')
@@ -60,8 +66,8 @@ class Application(tk.Frame):
 
         self.tree = Treeview(self.treeFrame)
         self.tree.column("#0", width=500, minwidth=300)
-        self.ysb = Scrollbar(self.treeFrame, orient='vertical', command=self.tree.yview)
-        self.tree.configure(yscroll=self.ysb.set)
+        self.treeysb = Scrollbar(self.treeFrame, orient='vertical', command=self.tree.yview)
+        self.tree.configure(yscroll=self.treeysb.set)
         self.tree.heading('#0', text='queues', anchor='w')
         for s in self.qm.getSessions():
             snode = self.tree.insert("", 'end', text=s, open=True)
@@ -79,7 +85,9 @@ class Application(tk.Frame):
         self.tree.bind("<<TreeviewSelect>>", self.TreeItemClick)
         self.tree.bind("<<TreeviewOpen>>", self.TreeItemExpand)
 
-        self.details = tk.Text(self.sendFrame, width=60)
+        self.details = tk.Text(self.detailFrame)
+        self.detailysb = Scrollbar(self.detailFrame, orient='vertical', command=self.details.yview)
+        self.details.configure(yscroll=self.detailysb.set)
 
         self.sendB = tk.Button(self.buttonFrame, text="Send Msg", command=self.Send)
         self.refreshB = tk.Button(self.buttonFrame, text='Refresh', command=self.Refresh)
@@ -148,6 +156,7 @@ class Application(tk.Frame):
 
     def purge_q(self):
         selItem = self.tree.selection()[0]
+        print(selItem)
         if selItem in self.qm.qmap:
             queue = self.qm.qmap[selItem]
             self.qm.purge(queue)
@@ -174,6 +183,6 @@ class Application(tk.Frame):
 
 
 root = tk.Tk()
-root.geometry("900x580")
+root.geometry("980x580")
 app = Application(master=root)
 app.mainloop()
