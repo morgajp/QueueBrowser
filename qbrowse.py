@@ -156,7 +156,6 @@ class Application(tk.Frame):
 
     def purge_q(self):
         selItem = self.tree.selection()[0]
-        print(selItem)
         if selItem in self.qm.qmap:
             queue = self.qm.qmap[selItem]
             self.qm.purge(queue)
